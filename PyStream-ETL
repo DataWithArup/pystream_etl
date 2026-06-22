@@ -1,1 +1,62 @@
+### 🔄 Advanced Pipeline Component: Async Batch Processor
 
+```python
+# File Name: batch_processor.py
+import asyncio
+import time
+from typing import List, Dict, Any
+
+class BatchProcessor:
+    """Simulates an asynchronous ETL stage that extracts, cleans, and loads data batches."""
+    def __init__(self, batch_size: int = 5) -> None:
+        self.batch_size = batch_size
+
+    async def extract_records(self) -> List[Dict[str, Any]]:
+        """Simulates fetching raw, messy data from an external source or log file."""
+        await asyncio.sleep(0.2)  # Simulate network latency
+        return [
+            {"record_id": 1, "value": 150.50, "flag": "Active"},
+            {"record_id": 2, "value": None, "flag": "Pending"},  # Corrupted record
+            {"record_id": 3, "value": 340.00, "flag": "Active"},
+            {"record_id": 4, "value": -10.25, "flag": "Active"},  # Out-of-bounds record
+            {"record_id": 5, "value": 420.75, "flag": "Active"}
+        ]
+
+    def transform_data(self, raw_records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Cleans records by dropping missing values and normalising flags."""
+        cleaned_records = []
+        for record in raw_records:
+            # Drop rows with missing values or invalid business metrics
+            if record.get("value") is None or record["value"] < 0:
+                continue
+            
+            # Standardize structural formatting
+            record["flag"] = record["flag"].upper()
+            record["processed_at"] = time.strftime("%Y-%m-%d %H:%M:%S")
+            cleaned_records.append(record)
+            
+        return cleaned_records
+
+    async def load_to_destination(self, cleaned_records: List[Dict[str, Any]]) -> bool:
+        """Simulates writing a clean batch of records into a target SQL database."""
+        if not cleaned_records:
+            return False
+        await asyncio.sleep(0.1)  # Simulate database I/O write operations
+        print(f"[LOAD SUCCESS] Ingested {len(cleaned_records)} records into the database.")
+        return True
+
+async def run_pipeline():
+    etl_worker = BatchProcessor(batch_size=5)
+    
+    print("Starting PyStream-ETL Batch Run...")
+    # Step 1: Extract
+    raw_data = await etl_worker.extract_records()
+    
+    # Step 2: Transform (CPU-bound data cleaning)
+    clean_data = etl_worker.transform_data(raw_data)
+    
+    # Step 3: Load
+    await etl_worker.load_to_destination(clean_data)
+
+if __name__ == "__main__":
+    asyncio.run(run_pipeline())
