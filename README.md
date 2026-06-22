@@ -1,4 +1,4 @@
-## 🚀 Featured Project:
+## 🚀 Featured Project: PyStream-ETL
 
 ### Here is a clean, professional, and visually appealing template you can use for showcase a Python project in your GitHub README.md. It balances readability with technical depth and uses GitHub’s native Markdown features (like syntax highlighting and dropdowns) to keep things organized.
 
